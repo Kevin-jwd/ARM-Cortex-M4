@@ -22,7 +22,7 @@ void Main(void)
 	GPIOA_MODER = 0x1 << 10;
 	GPIOA_OTYPER = 0x0 << 5;
 
-	int i;
+	volatile int i;
 
 	for(;;)
 	{

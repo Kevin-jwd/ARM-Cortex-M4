@@ -16,18 +16,18 @@ void Main(void)
 	printf("CMSIS Based Register Define\n");
 
 	// LED Pin을 출력으로 설정
+	GPIOA->MODER  = (1 << 10);
+	GPIOA->OTYPER =  (0 << 5);
 
 
 	for(;;)
 	{
 		// LED ON
-
-
+		GPIOA->ODR    =  (1 << 5);
 		for(i=0; i<0x40000; i++);
 
 		// LED OFF
-
-
+		GPIOA->ODR    =  (0 << 5);
 		for(i=0; i<0x40000; i++);
 	}
 }
