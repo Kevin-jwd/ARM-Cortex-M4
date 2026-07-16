@@ -9,7 +9,7 @@ static void Sys_Init(int baud)
 	LED_Init();
 }
 
-#if 1
+#if 0
 
 /* 반드시 Option.h의 조건부 컴파일 부분을 변경한 후 실험 */
 
