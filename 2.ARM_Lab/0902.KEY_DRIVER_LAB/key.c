@@ -1,5 +1,7 @@
 #include "device_driver.h"
 
+#define GPIOC_PIN      (13U)
+
 void Key_Poll_Init(void)
 {
 	Macro_Set_Bit(RCC->AHB1ENR, 2); 
@@ -8,15 +10,28 @@ void Key_Poll_Init(void)
 
 int Key_Get_Pressed(void)
 {
-	// Key가 눌렸으면 1, 안 눌렸으면 0 리턴
+	// Key가 눌렸으면 0, 안 눌렸으면 1 리턴
+	return (Macro_Check_Bit_Clear(GPIOC->IDR, GPIOC_PIN));
 }
 
 void Key_Wait_Key_Pressed(void)
 {
-	// 키가 눌릴때까지 대기하고 눌리면 리턴
+	// Key가 눌리지 않은 동안 (1)
+	while(Macro_Check_Bit_Set(GPIOC->IDR, GPIOC_PIN))
+	// while(!Macro_Check_Bit_Clear(GPIOC->IDR, GPIOC_PIN))
+	{
+		;
+	}
+	// return;
 }
 
 void Key_Wait_Key_Released(void)
 {
-	// 키가 안 눌릴때까지 대기하고 안 눌리면 리턴
+	// Key가 눌린 동안 (0)
+	while(Macro_Check_Bit_Clear(GPIOC->IDR, GPIOC_PIN))
+	// while(!Macro_Check_Bit_Set(GPIOC->IDR, GPIOC_PIN))
+	{
+		;
+	}
+	// return;
 }
