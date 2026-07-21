@@ -2,9 +2,25 @@
 #include <stdio.h>
 #include <macro.h>
 
-#define GPIOA0_PIN 0U
-#define GPIOA1_PIN 1U
-#define BAUD_RATE 115200U
+#define BAUD_RATE  (115200U)
+
+#define GPIOA0_PIN      (0U)
+#define GPIOA1_PIN      (1U)
+#define GPIOC_PIN      (13U)
+#define DELAY_CNT (1000000U)
+
+#define OUTPUT_PUSH_PULL            (0x0)
+#define GENERAL_PURPOSE_OUTPUT_MODE (0x1)
+#define TURN_RIGHT_SIGNAL           (0x1)
+#define TURN_LEFT_SIGNAL            (0x0)
+
+#define RXNE_BIT       (5U)
+
+typedef enum {
+	STOP,
+	TURN_RIGHT,
+	TURN_LEFT
+} STATE;
 
 static void Sys_Init(int baud)
 {
@@ -13,11 +29,18 @@ static void Sys_Init(int baud)
 	setvbuf(stdout, NULL, _IONBF, 0);
 }
 
+void Key_Poll_Init(void)
+{
+	Macro_Set_Bit(RCC->AHB1ENR, 2); 
+	Macro_Write_Block(GPIOC->MODER, 0x3, 0x0, 26);
+}
+
 void Main(void)
 {
 	Sys_Init(BAUD_RATE);
+	Key_Poll_Init();
 	printf("LED Toggling : Macro\n");
-
+	
 	volatile int i;
 
 	// PA0, PA1 : General purpose output mode (0101)
@@ -26,31 +49,15 @@ void Main(void)
 	// PA0, PA1 : Output push-pull (00)
 	Macro_Write_Block(GPIOA->OTYPER, 0x3, 0x0, GPIOA0_PIN);
 
-	// Turn right (1A: L, 2A: H) (01)
-	Macro_Write_Block(GPIOA->ODR, 0x3, 0x1, GPIOA0_PIN);
-	for(i=0;i<800000;i++)
-	{
-		;
-	}
+	// Initialize Motor
+	Macro_Write_Block(GPIOA->ODR, 0x3, 0x0, GPIOA0_PIN);
 
-	// Fast motor stop
-	Macro_Write_Block(GPIOA->ODR, 0x3, 0x3, GPIOA0_PIN);
-	for(i=0;i<800000;i++)
-	{
-		;
-	}
+	int state = STOP;
+	volatile int i = 0;
 
-	// Turn left (1A: H, 2A: L) (10)
-	Macro_Write_Block(GPIOA->ODR, 0x3, 0x2, GPIOA0_PIN);
-	for(i=0;i<800000;i++)
+	for(;;)
 	{
-		;
-	}
 
-	// Fast motor stop
-	Macro_Write_Block(GPIOA->ODR, 0x3, 0x3, GPIOA0_PIN);
-	for(i=0;i<800000;i++)
-	{
-		;
+		
 	}
 }

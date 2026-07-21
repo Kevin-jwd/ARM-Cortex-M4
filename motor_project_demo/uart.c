@@ -40,7 +40,7 @@ void Uart2_Send_Byte(char data)
   if(data == '\n')
   {
     while(!Macro_Check_Bit_Set(USART2->SR, 7));
-    USART2->DR = 0x0d;
+    USART2->DR = 0x0d;  // '\r'
   }
 
   while(!Macro_Check_Bit_Set(USART2->SR, 7));
