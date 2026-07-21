@@ -57,13 +57,11 @@ void Main(void)
 	{
 		if(Key_Get_Pressed())
 		{ 
-			TIM4_Repeat(3*1000);
+			TIM2_Start_OnePulse(3*1000);
 			while(!Macro_Check_Bit_Set(GPIOC->IDR, 13))
 			{
-				printf("\nkey pressing\n");
 				if(TIM4_Check_Timeout())
 				{
-					printf("\ntime out!\n");
 					end_flag = 1;
 				}
 			}

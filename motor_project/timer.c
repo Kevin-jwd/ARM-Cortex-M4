@@ -101,6 +101,42 @@ void TIM2_Delay(int time)
 }
 #endif
 
+void TIM2_Start_OnePulse(int time)
+{
+	Macro_Set_Bit(RCC->APB1ENR, TIM2_CLK_EN_BIT);
+
+	// TIM4 CR1: ARPE=0, down counter, repeat mode
+	TIM2->CR1 = (ARPE_DOWN << ARPE_BIT) | (DIR_DOWN << DIR_BIT) | (OPM_ONE_SHOT << OPM_BIT) | (CEN_DISABLE << CEN_BIT);
+
+	// PSC(50KHz),  ARR 설정
+    TIM2->PSC = (int)(DEFAULT_PSC + 0.5) - 1;
+
+	// ARR 초기값 설정 => 요청한 time msec에 해당하는 초기값 설정
+    TIM2->ARR = time * (int)(1000. / TIM2_TICK + 0.5);
+
+	// UG 이벤트 발생
+    Macro_Set_Bit(TIM2->EGR, UG_BIT);
+
+	// Update Interrupt Pending Clear
+    Macro_Clear_Bit(TIM2->SR, UIF_BIT);
+
+	// TIM4 start
+    Macro_Set_Bit(TIM2->CR1, CEN_BIT);
+}
+
+int TIM2_Check_Timeout(void)
+{
+	if(Macro_Check_Bit_Set(TIM2->SR, UIF_BIT))
+	{
+		Macro_Clear_Bit(TIM2->SR, UIF_BIT);
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 void TIM4_Repeat(int time)
 {
 	Macro_Set_Bit(RCC->APB1ENR, TIM4_CLK_EN_BIT);
