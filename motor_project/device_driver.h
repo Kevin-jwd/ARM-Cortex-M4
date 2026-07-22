@@ -41,10 +41,12 @@ extern void Key_Wait_Key_Released(void);
 extern void Key_Wait_Key_Pressed(void);
 
 // Timer.c
-
 extern void TIM2_Delay(int time);
 extern void TIM2_Stopwatch_Start(void);
 extern unsigned int TIM2_Stopwatch_Stop(void);
+extern void TIM2_Start_OnePulse(int time);
+extern int TIM2_Check_Timeout(void);
+
 extern void TIM4_Repeat(int time);
 extern int TIM4_Check_Timeout(void);
 extern void TIM4_Stop(void);
