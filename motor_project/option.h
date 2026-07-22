@@ -19,6 +19,12 @@
 #define TIM2_1ms_Pls (TIM2_FREQ/1000.)
 #define TIM2_MAX    (0xFFFFU)
 
+/* Timer 2 1pulse 주기, 주파수 */
+#define TIM3_TICK					(1000000/TIM3_FREQ)	// usec
+#define TIM3_FREQ					(8000000)			// Hz
+#define TIME3_PLS_OF_1ms			(1000/TIM3_TICK)
+#define TIM3_PWM_ARR                (1000U - 1U)        // 1k
+
 /* Timer 4 1pulse 주기, 주파수 */
 #define TIM4_TICK (20U)
 #define TIM4_FREQ (1000000. / TIM4_TICK)

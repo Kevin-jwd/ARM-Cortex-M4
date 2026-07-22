@@ -48,6 +48,10 @@ extern unsigned int TIM2_Stopwatch_Stop(void);
 extern void TIM2_Start_OnePulse(int time);
 extern int TIM2_Check_Timeout(void);
 
+extern void TIM3_Out_PWM_Generation(unsigned short freq, int duty);
+extern void TIM3_Out_Freq_Generation(unsigned short freq);
+extern void TIM3_Out_Stop(void);
+
 extern void TIM4_Repeat(int time);
 extern int TIM4_Check_Timeout(void);
 extern void TIM4_Stop(void);
