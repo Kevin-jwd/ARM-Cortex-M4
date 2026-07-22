@@ -13,8 +13,9 @@ extern void Uart1_Send_Byte(char data);
 extern void Uart1_Send_String(char *pt);
 extern void Uart1_Printf(char *fmt,...);
 extern char Uart1_Get_Char(void);
-extern char Uart1_Get_Pressed(void);
-
+extern char Uart1_Get_Pressed(void);                               
+extern char Uart2_Get_Pressed(void);
+                        
 // SysTick.c
 
 extern void SysTick_Run(unsigned int msec);

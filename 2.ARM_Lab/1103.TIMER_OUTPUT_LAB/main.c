@@ -34,6 +34,16 @@ void Main(void)
 
 	TIM3_Out_Init();
 
+
+	TIM3_Out_PWM_Generation(1000, 20);
+	TIM2_Delay(200);
+	TIM3_Out_PWM_Generation(1000, 40);
+	TIM2_Delay(200);
+	TIM3_Out_PWM_Generation(1000, 60);
+	TIM2_Delay(200);
+	TIM3_Out_PWM_Generation(1000, 80);
+	TIM2_Delay(200);
+
 	printf("%s ", note_name[C1]);
 	Buzzer_Beep(C1,N4);
 	printf("%s ", note_name[D1]);

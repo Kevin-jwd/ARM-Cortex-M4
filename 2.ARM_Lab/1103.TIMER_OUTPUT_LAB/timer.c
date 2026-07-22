@@ -10,6 +10,27 @@
 #define TIME4_PLS_OF_1ms  	(1000/TIM4_TICK)
 #define TIM4_MAX	  		(0xffffu)
 
+#define UG_BIT (0U)
+
+/* TIMx->CR1: Timer 기본 설정 레지스터 */
+// bit position
+#define ARPE_BIT     (7U)
+#define DIR_BIT      (4U)
+#define OPM_BIT      (3U)
+#define CEN_BIT      (0U)
+
+// bit value
+#define ARPE_DOWN    (0U)
+#define DIR_DOWN     (1U)
+#define OPM_ONE_SHOT (1U)
+#define OPM_REPEAT   (0U)
+#define CEN_ENABLE   (1U)
+#define CEN_DISABLE  (0U)
+
+/* TIMx->EGR: 업데이트 발생 레지스터 */
+#define UG_BIT (0U)
+
+
 void TIM2_Stopwatch_Start(void)
 {
 	Macro_Set_Bit(RCC->APB1ENR, 0);
@@ -131,25 +152,80 @@ void TIM3_Out_Init(void)
 {
 	Macro_Set_Bit(RCC->AHB1ENR, 1);
 	Macro_Set_Bit(RCC->APB1ENR, 1);
-
+	
 	Macro_Write_Block(GPIOB->MODER, 0x3, 0x2, 0);  	// PB0 => ALT
 	Macro_Write_Block(GPIOB->AFR[0], 0xf, 0x2, 0); 	// PB0 => AF02
-
+	
 	Macro_Write_Block(TIM3->CCMR2,0xff, 0x60, 0);
 	TIM3->CCER = (0<<9)|(1<<8);
-}
+	}
+#if 0
 
 void TIM3_Out_Freq_Generation(unsigned short freq)
 {
+	TIM3->CR1 = (0x1 << 4) | (0x0 << 3);
 	// Timer 주파수가 TIM3_FREQ가 되도록 PSC 설정
-	// 요청한 주파수가 되도록 ARR 설정
-	// Duty Rate 50%가 되도록 CCR3 설정
-	// Manual Update(UG 발생)
-	// Down Counter, Repeat Mode, Timer Start
+	// 96MHz / 8MHz
+	TIM3->PSC = TIMXCLK / TIM3_FREQ - 1;
 
+	// 요청한 주파수가 되도록 ARR 설정
+	// 8MHz / target_freq
+	TIM3->ARR = (int)((double)TIM3_FREQ / freq + 0.5) -1 ;
+
+	// Duty Rate 50%가 되도록 CCR3 설정
+	TIM3->CCR3 = TIM3->ARR / 2;
+
+	// Manual Update(UG 발생)
+	Macro_Set_Bit(TIM3->EGR, UG_BIT);
+
+	// Down Counter, Repeat Mode, Timer Start
+	TIM3->CR1 = (DIR_DOWN << DIR_BIT) | (OPM_REPEAT << OPM_BIT) | (CEN_ENABLE << CEN_BIT);
 }
 
+#endif
 void TIM3_Out_Stop(void)
 {
 	Macro_Clear_Bit(TIM3->CR1, 0);
 }
+
+#if 1
+
+void TIM3_Out_PWM_Generation(unsigned short freq, int duty)
+{
+	TIM3->CR1 = (0x1 << 4) | (0x0 << 3);
+
+	TIM3->PSC = TIMXCLK / TIM3_FREQ - 1;
+
+	TIM3->ARR = (int)((double)TIM3_FREQ / freq + 0.5) -1 ;
+
+	// Duty Rate 50%가 되도록 CCR3 설정
+	TIM3->CCR3 = (int)(TIM3->ARR * ((double)duty / 100.) + 0.5);
+
+	// Manual Update(UG 발생)
+	Macro_Set_Bit(TIM3->EGR, UG_BIT);
+
+	// Down Counter, Repeat Mode, Timer Start
+	TIM3->CR1 = (DIR_DOWN << DIR_BIT) | (OPM_REPEAT << OPM_BIT) | (CEN_ENABLE << CEN_BIT);
+}
+
+void TIM3_Out_Freq_Generation(unsigned short freq)
+{
+	TIM3->CR1 = (0x1 << 4) | (0x0 << 3);
+	// Timer 주파수가 TIM3_FREQ가 되도록 PSC 설정
+	// 96MHz / 8MHz
+	TIM3->PSC = TIMXCLK / TIM3_FREQ - 1;
+
+	// 요청한 주파수가 되도록 ARR 설정
+	// 8MHz / target_freq
+	TIM3->ARR = (int)((double)TIM3_FREQ / freq + 0.5) -1 ;
+
+	// Duty Rate 50%가 되도록 CCR3 설정
+	TIM3->CCR3 = TIM3->ARR / 2;
+
+	// Manual Update(UG 발생)
+	Macro_Set_Bit(TIM3->EGR, UG_BIT);
+
+	// Down Counter, Repeat Mode, Timer Start
+	TIM3->CR1 = (DIR_DOWN << DIR_BIT) | (OPM_REPEAT << OPM_BIT) | (CEN_ENABLE << CEN_BIT);
+}
+#endif

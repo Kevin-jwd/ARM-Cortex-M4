@@ -17,8 +17,8 @@
 #define GPIOC_PIN           (13U)
 #define DELAY_CNT      (1000000U)
 
-#define FOUR_BIT_GENERAL_PURPOSE_OUTPUT_MODE       (0x5U)
-#define TWO_BIT_OUTPUT_PUSH_PULL_MODE              (0x0U)
+#define FOUR_BIT_GENERAL_PURPOSE_OUTPUT_MODE (0x5U)
+#define TWO_BIT_OUTPUT_PUSH_PULL_MODE        (0x0U)
 
 #define TURN_RIGHT_SIGNAL (0x2U)
 #define TURN_LEFT_SIGNAL  (0x1U)
@@ -35,7 +35,12 @@ typedef enum {
 	TURN_RIGHT,
 	TURN_LEFT,
 	STOP
-} STATE;
+} MOTOR_STATE;
+
+typedef enum {
+	IS_RELEASED,
+	IS_PRESSED
+} BTN_STATE;
 
 void Main(void)
 {
@@ -54,44 +59,53 @@ void Main(void)
 	// Macro_Write_Block(GPIOA->ODR, TWO_BIT, STOP_SIGNAL, GPIOA0_PIN);
 	
 	int state = STOP;
-	int prev_state = state;
+	int btn_state = IS_RELEASED;
+	int prev_btn_state = btn_state;
 	int end_flag = 0;
-	
+	int is_timer_started = 0;
+
 	for(;;)
 	{
-		if(Key_Get_Pressed())
-		{ 
-			TIM2_Start_OnePulse(STOP_MSEC);
-			while(!Macro_Check_Bit_Set(GPIOC->IDR, GPIOC_PIN))
-			{
-				if(TIM2_Check_Timeout())
-				{
-					end_flag = 1;
-				}
-			}
-			state = (end_flag) ? STOP : (state == STOP) ? TURN_RIGHT : (state + 1) % STATE_CNT;
-			end_flag = 0;
-		}
-		
-		if(state != prev_state)
+		prev_btn_state = btn_state;
+		btn_state = Key_Get_Pressed();
+
+		// Falling Edge
+		if((prev_btn_state == IS_RELEASED) & (btn_state == IS_PRESSED))
 		{
-			Stop();
-			TIM2_Delay(STOP_DELAY_MSEC);
+			end_flag = 0;
+			TIM2_Start_OnePulse(STOP_MSEC);
+			is_timer_started = 1;
 		}
-		
+
+		// Rising Edge
+		if((prev_btn_state == IS_PRESSED) & (btn_state == IS_RELEASED))
+		{
+			is_timer_started = 0;
+			state = (end_flag) ? STOP : (state == STOP) ? TURN_RIGHT : (state + 1) % 2;
+
+		}
+		if(is_timer_started & TIM2_Check_Timeout())
+		{
+			state = STOP;
+			end_flag = 1;
+			is_timer_started = 0;
+		}
+
 		switch(state)
 		{
+			case STOP:
+				Stop();
+				break;
 			case TURN_RIGHT:
-			Turn_Right();
-			break;
+				Turn_Right();
+				break;
 			case TURN_LEFT:
-			Turn_Left();
-			break;
+				Turn_Left();
+				break;
 			default:
-			Stop();
-			break;
+				Stop();
+				break;
 		}
-		prev_state = state;
 	}
 }
 
@@ -118,3 +132,6 @@ void Stop(void)
 {
 	Macro_Write_Block(GPIOA->ODR, TWO_BIT, STOP_SIGNAL, GPIOA0_PIN);
 }
+
+// void Short_Stop(void)
+// 

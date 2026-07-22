@@ -50,5 +50,7 @@ extern int TIM4_Check_Timeout(void);
 extern void TIM4_Stop(void);
 extern void TIM4_Change_Value(int time);
 extern void TIM3_Out_Init(void);
+extern void TIM3_Out_PWM_Generation(unsigned short freq, int duty);
 extern void TIM3_Out_Freq_Generation(unsigned short freq);
 extern void TIM3_Out_Stop(void);
+
