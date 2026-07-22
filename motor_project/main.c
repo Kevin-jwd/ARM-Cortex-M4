@@ -1,50 +1,54 @@
 #include "device_driver.h"
 #include <stdio.h>
 
+// Basic settings
 #define BAUD_RATE       (115200U)
 #define STOP_MSEC         (3000U)
 #define STOP_DELAY_MSEC    (300U)
-#define STATE_CNT            (2U)
+#define MOTOR_STATE_CNT  (2U)
 
+// Bit position
 #define TWO_BIT            (0x3U)
 #define FOUR_BIT           (0xFU)
 
+// GPIO Mode
 #define PUSH_PULL_MODE      (0x0U)
 #define GENERAL_OUTPUT_MODE (0x1U)
-
-#define GPIOA0_PIN           (0U)
-#define GPIOA1_PIN           (1U)
-#define GPIOC_PIN           (13U)
-#define DELAY_CNT      (1000000U)
 
 #define FOUR_BIT_GENERAL_PURPOSE_OUTPUT_MODE (0x5U)
 #define TWO_BIT_OUTPUT_PUSH_PULL_MODE        (0x0U)
 
-#define TURN_Clockwise_SIGNAL          (0x2U)
-#define TURN_Counter_Clockwise_SIGNAL  (0x1U)
+// GPIO PIN (PA0, PA1, PC13)
+#define GPIOA0_PIN           (0U)
+#define GPIOA1_PIN           (1U)
+#define GPIOC_PIN           (13U)
+
+// Motor Pin Signal
+#define TURN_CLOCKWISE_SIGNAL          (0x2U)
+#define TURN_COUNTER_CLOCKWISE_SIGNAL  (0x1U)
 #define STOP_SIGNAL       (0x0U)
 
-#define RXNE_BIT         (5U)
-
-#define MOTOR_STATE_CNT  (2U)
-
+// Function declaration
 static void Sys_Init(int baud);
 static void GPIO_Init(void);
 static void Turn_Clockwise(void);
 static void Turn_Counter_Clockwise(void);
 static void Stop(void);
 
+// Motor State enumerate
 typedef enum t_MOTOR_STATE{
 	TURN_CLOCKWISE          = 0U,
 	TURN_COUNTER_CLOCKWISE  = 1U,
 	STOP                    = 2U
 } MOTOR_STATE;
 
+// Button State enumerate
 typedef enum t_BTN_STATE{
 	IS_RELEASED = 0U,
 	IS_PRESSED  = 1U
 } BTN_STATE;
 
+/* Main */
 void Main(void)
 {
 	// Initialization
@@ -108,14 +112,14 @@ void Main(void)
 		// motor_state에 따라 Action
 		switch(motor_state)
 		{
-			case STOP:
-				Stop();
-				break;
 			case TURN_CLOCKWISE:
 				Turn_Clockwise();
 				break;
 			case TURN_COUNTER_CLOCKWISE:
 				Turn_Counter_Clockwise();
+				break;
+			case STOP:
+				Stop();
 				break;
 			default:
 				Stop();
@@ -124,6 +128,7 @@ void Main(void)
 	}
 }
 
+/* Initialize Timer, Uart, LED */
 static void Sys_Init(int baud) 
 {
 	SCB->CPACR |= (0x3 << 10*2)|(0x3 << 11*2); 
@@ -133,6 +138,7 @@ static void Sys_Init(int baud)
 	LED_Init();
 }
 
+/* Initialize GPIO Pins */
 static void GPIO_Init(void)
 {
 	// PA0, PA1 : General purpose output mode (0101)
@@ -142,16 +148,19 @@ static void GPIO_Init(void)
 	Macro_Write_Block(GPIOA->OTYPER, TWO_BIT, TWO_BIT_OUTPUT_PUSH_PULL_MODE, GPIOA0_PIN);
 }
 
+/* Motor Turn Clockwise function */
 static void Turn_Clockwise(void)
 {
-	Macro_Write_Block(GPIOA->ODR, TWO_BIT, TURN_Clockwise_SIGNAL, GPIOA0_PIN);
+	Macro_Write_Block(GPIOA->ODR, TWO_BIT, TURN_CLOCKWISE_SIGNAL, GPIOA0_PIN);
 }
 
+/* Motor Turn Counter Clockwise function */
 static void Turn_Counter_Clockwise(void)
 {
-	Macro_Write_Block(GPIOA->ODR, TWO_BIT, TURN_Counter_Clockwise_SIGNAL, GPIOA0_PIN);
+	Macro_Write_Block(GPIOA->ODR, TWO_BIT, TURN_COUNTER_CLOCKWISE, GPIOA0_PIN);
 }
 
+/* Motor Stop function */
 static void Stop(void)
 {
 	Macro_Write_Block(GPIOA->ODR, TWO_BIT, STOP_SIGNAL, GPIOA0_PIN);
