@@ -12,3 +12,5 @@
 #define STACK_LIMIT	(HEAP_LIMIT + 8)
 #define STACK_BASE	(RAM_END + 1)
 #define STACK_SIZE	(STACK_BASE - STACK_LIMIT)
+
+#define RXNEIE_BIT (5U)

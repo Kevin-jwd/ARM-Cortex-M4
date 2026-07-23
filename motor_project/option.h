@@ -13,6 +13,14 @@
 #define STACK_BASE (RAM_END + 1)
 #define STACK_SIZE (STACK_BASE - STACK_LIMIT)
 
+/* 비트 position */
+#define FOUR_BIT (0xFU)
+#define TWO_BIT  (0x3U)
+#define ONE_BIT  (0x1U)
+
+/* 내부 스위치 PIN */
+#define PORTC_SW_PIN (13U)
+
 /* Timer 2 1pulse 주기, 주파수 */
 #define TIM2_TICK (20U)
 #define TIM2_FREQ (1000000. / TIM2_TICK)
@@ -23,7 +31,7 @@
 #define TIM3_TICK					(1000000/TIM3_FREQ)	// usec
 #define TIM3_FREQ					(8000000)			// Hz
 #define TIME3_PLS_OF_1ms			(1000/TIM3_TICK)
-#define TIM3_PWM_ARR                (1000U - 1U)        // 1k
+#define TIM3_PWM_ARR                (10000U - 1U)        // 10k
 
 /* Timer 4 1pulse 주기, 주파수 */
 #define TIM4_TICK (20U)
@@ -41,6 +49,8 @@
 #define DIR_BIT      (4U)
 #define OPM_BIT      (3U)
 #define CEN_BIT      (0U)
+#define UIE_BIT      (0U)
+#define UIF_BIT      (0U)
 
 // bit value
 #define ARPE_DOWN    (0U)
@@ -61,3 +71,16 @@
 
 /* 16 bit auto-reload register: reload시 적재될 초기값 설정 */
 #define DEFAULT_ARR (0xFFFFU)
+
+/* IQR 관련 비트 설정 */
+#define SYSCFG_CLK_ENABLE_BIT  (14U)
+#define EXTICR_PORT_C_BIT     (0x2U)
+
+#define FALLING_EDGE_SELECT   (0x1U)
+#define RISING_EDGE_SELECT    (0x1U)
+
+#define PENDING_CLEAR_BIT     (0x1U)
+
+/* UART2 */
+#define RXNEIE_BIT (5U)
+

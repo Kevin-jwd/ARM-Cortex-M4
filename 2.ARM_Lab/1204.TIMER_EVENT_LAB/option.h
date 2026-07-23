@@ -12,3 +12,8 @@
 #define STACK_LIMIT	(HEAP_LIMIT + 8)
 #define STACK_BASE	(RAM_END + 1)
 #define STACK_SIZE	(STACK_BASE - STACK_LIMIT)
+
+#define TIM4_EN_BIT        (2U)
+#define UIE_BIT            (0U)
+#define UIF_BIT            (0U)
+#define COUNTER_ENABLE_BIT (0U)

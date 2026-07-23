@@ -40,6 +40,7 @@ extern void Key_Poll_Init(void);
 extern int Key_Get_Pressed(void);
 extern void Key_Wait_Key_Released(void);
 extern void Key_Wait_Key_Pressed(void);
+extern void Key_ISR_Enable(int en);
 
 // Timer.c
 extern void TIM2_Delay(int time);
@@ -47,9 +48,10 @@ extern void TIM2_Stopwatch_Start(void);
 extern unsigned int TIM2_Stopwatch_Stop(void);
 extern void TIM2_Start_OnePulse(int time);
 extern int TIM2_Check_Timeout(void);
+extern void TIM2_Stop(void);
+extern void TIM2_Repeat_Interrupt_Enable(int en, int time);
 
-extern void TIM3_Out_PWM_Generation(unsigned short freq, int duty);
-extern void TIM3_Out_Freq_Generation(unsigned short freq);
+extern void TIM3_Out_Freq_Generation(unsigned short freq, uint8_t speed_level);
 extern void TIM3_Out_Stop(void);
 
 extern void TIM4_Repeat(int time);

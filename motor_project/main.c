@@ -34,6 +34,8 @@ static void GPIO_Init(void);
 static void Turn_Clockwise(void);
 static void Turn_Counter_Clockwise(void);
 static void Stop(void);
+static void Turn_Clockwise_PWM(void);
+static void Turn_Counter_Clockwise_PWM(void);
 
 // Motor State enumerate
 typedef enum t_MOTOR_STATE{
@@ -48,14 +50,24 @@ typedef enum t_BTN_STATE{
 	IS_PRESSED  = 1U
 } BTN_STATE;
 
+// 타이머 시작, 타이머 타임아웃 플래그 초기화
+volatile uint8_t is_timer_started = 0U;
+volatile uint8_t is_timer_timeout = 0U;
+volatile int is_falling_edge_detected = 0U;
+
+volatile uint8_t Uart_Data_In = 0U;
+volatile unsigned char Uart_Data = 0;
+
 /* Main */
 void Main(void)
 {
 	// Initialization
 	Sys_Init(BAUD_RATE);
-	Key_Poll_Init();
+	Key_ISR_Enable(1);
+
 	GPIO_Init();
 	Stop();
+	
 	printf("Motor Start\n");
 	
 	// 상태 변수 초기화
@@ -63,51 +75,42 @@ void Main(void)
 	BTN_STATE curr_btn_state = IS_RELEASED;
 	BTN_STATE prev_btn_state = curr_btn_state;
 
-	// 타이머 시작, 타이머 타임아웃 플래그 초기화
-	uint8_t is_timer_started = 0U;
-	uint8_t is_timer_timeout = 0U;
-
 	// FSM 진입
 	for(;;)
 	{
 		char received_data = Uart2_Get_Pressed();
 		if((received_data >= '1') && (received_data <= '9'))
 		{
-			;
+			TIM3_Out_Freq_Generation(10000U, received_data - 0);
 		}
-		prev_btn_state = curr_btn_state;
-		curr_btn_state = Key_Get_Pressed();
-
+		if(is_falling_edge_detected)
+		{
+			printf("Falling edge!");
+		}
 		// Falling Edge Detection (prev: H, curr: L)
 		// MISRA C: 조건문에서 비트 연산자 (&) 대신 논리 연산자 (&&) 사용
-		if((prev_btn_state == IS_RELEASED) && (curr_btn_state == IS_PRESSED))
-		{
-			is_timer_timeout = 0;
-			TIM2_Start_OnePulse(STOP_MSEC);
-			is_timer_started = 1;
-		}
+		// if(is_falling_edge_detected && !is_timer_started)
+		// {
+		// 	printf("Falling Edge!\n");
+		// 	TIM2_Repeat_Interrupt_Enable(1, 1000);
+		// 	is_timer_started = 1U;
+		// }
+				
+		// // Rising Edge Detection (prev: L, curr: H)
+		// if(!is_falling_edge_detected && is_timer_started)
+		// {
+		// 	printf("Rising Edge!\n");
+		// 	is_timer_started = 0U;
+		// 	is_timer_timeout = 0U;
+		// 	TIM2_Stop();
+		// 	motor_state = (motor_state == STOP) ? TURN_CLOCKWISE : (1U - motor_state);
+		// }
 
-		// Rising Edge Detection (prev: L, curr: H)
-		if((prev_btn_state == IS_PRESSED) && (curr_btn_state == IS_RELEASED))
-		{
-			is_timer_started = 0;
-			if(is_timer_timeout)
-			{
-				motor_state = STOP;
-			}
-			else
-			{
-				motor_state = (motor_state == STOP) ? TURN_CLOCKWISE : (1U - motor_state);
-			}
-		}
-
-		// 버튼 눌린 채로 3초 지남
-		if(TIM2_Check_Timeout() & is_timer_started)
-		{
-			is_timer_timeout = 1;
-			is_timer_started = 0;
-			motor_state = STOP;
-		}
+		// // 버튼 눌린 채로 3초 지남
+		// if(is_timer_timeout)
+		// {
+		// 	motor_state = STOP;
+		// }
 
 		// motor_state에 따라 Action
 		switch(motor_state)
@@ -165,3 +168,20 @@ static void Stop(void)
 {
 	Macro_Write_Block(GPIOA->ODR, TWO_BIT, STOP_SIGNAL, GPIOA0_PIN);
 }
+
+static void Turn_Clockwise_PWM(void)
+{
+	Macro_Write_Block(GPIOA->MODER, 0xf, 0xa, 0);     // PA0 => ALT
+  	Macro_Write_Block(GPIOA->AFR[0], 0xf, 0x2, 0);  // PA2,3 => AF07
+	Macro_Clear_Bit(GPIOA->ODR, GPIOA1_PIN);
+	// Macro_Write_Block(GPIOA->ODR, TWO_BIT, TURN_CLOCKWISE_SIGNAL, GPIOA0_PIN);
+}
+
+static void Turn_Counter_Clockwise_PWM(void)
+{
+	Macro_Write_Block(GPIOA->MODER, 0xf, 0xa, 4);     // PA2,3 => ALT
+  	Macro_Write_Block(GPIOA->AFR[0], 0xf, 0x2, 4);  // PA2,3 => AF07
+	Macro_Clear_Bit(GPIOA->ODR, GPIOA0_PIN);
+	// Macro_Write_Block(GPIOA->ODR, TWO_BIT, TURN_CLOCKWISE_SIGNAL, GPIOA0_PIN);
+}
+

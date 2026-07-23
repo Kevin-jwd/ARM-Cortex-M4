@@ -60,6 +60,24 @@ void Uart2_Send_Byte(char data)
   USART2->DR = data;
 }
 
+void Uart2_RX_Interrupt_Enable(int en)
+{
+    if(en)
+  {
+		// USART2 RX Interrupt Enable
+    Macro_Set_Bit(USART2->CR1, RXNEIE_BIT);
+		// NIVC Pending Clear
+    NVIC_ClearPendingIRQ(USART2_IRQn);
+		// NVIC Interrupt Enable
+    NVIC_EnableIRQ(USART2_IRQn);
+  }
+  else
+  {
+    Macro_Clear_Bit(USART2->CR1, RXNEIE_BIT);
+    NVIC_DisableIRQ(USART2_IRQn);
+  }
+}
+
 void Uart1_Init(int baud)
 {
   double div;

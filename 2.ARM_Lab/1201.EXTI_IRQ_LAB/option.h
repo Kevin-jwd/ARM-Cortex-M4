@@ -12,3 +12,16 @@
 #define STACK_LIMIT	(HEAP_LIMIT + 8)
 #define STACK_BASE	(RAM_END + 1)
 #define STACK_SIZE	(STACK_BASE - STACK_LIMIT)
+
+#define FOUR_BIT              (0xfU)
+#define TWO_BIT               (0x3U)
+#define ONE_BIT               (0x1U)
+
+#define SYSCFG_CLK_ENABLE_BIT  (14U)
+#define EXTICR_PORT_C_BIT     (0x2U)
+
+#define FALLING_EDGE_SELECT   (0x1U)
+
+#define PIN_NUM                (13U)
+
+#define PENDING_CLEAR_BIT     (0x1U)
