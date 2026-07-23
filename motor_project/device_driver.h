@@ -58,3 +58,4 @@ extern void TIM4_Repeat(int time);
 extern int TIM4_Check_Timeout(void);
 extern void TIM4_Stop(void);
 extern void TIM4_Change_Value(int time);
+extern void TIM4_Repeat_Interrupt_Enable(int en, int time);

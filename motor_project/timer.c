@@ -1,5 +1,6 @@
 #include "device_driver.h"
 
+/* ========== Timer 2 ========== */
 void TIM2_Repeat_Interrupt_Enable(int en, int time)
 {
 	if(en)
@@ -12,8 +13,8 @@ void TIM2_Repeat_Interrupt_Enable(int en, int time)
 		TIM2->ARR = TIM2_1ms_Pls * time;
 		Macro_Set_Bit(TIM2->EGR,0);
 
-		// TIM4 Pending Clear (bit 0 UIF Set)
-		Macro_Set_Bit(TIM2->SR, UIF_BIT);
+		// TIM4 Pending Clear (bit 0 UIF Clear)
+		Macro_Clear_Bit(TIM2->SR, UIF_BIT);
 
 		// NVIC Pending Clear
 		NVIC_ClearPendingIRQ(TIM2_IRQn);
@@ -35,142 +36,6 @@ void TIM2_Repeat_Interrupt_Enable(int en, int time)
 		Macro_Clear_Bit(TIM2->DIER, 0);
 	}
 }
-
-void TIM4_Repeat_Interrupt_Enable(int en, int time)
-{
-	if(en)
-	{
-		// TIM4 Clock On
-		Macro_Set_Bit(RCC->APB1ENR, 2);
-
-		TIM4->CR1 = (1<<4)|(0<<3);
-		TIM4->PSC = (unsigned int)(TIMXCLK/(double)TIM4_FREQ + 0.5)-1;
-		TIM4->ARR = TIM4_1ms_Pls * time;
-		Macro_Set_Bit(TIM4->EGR,0);
-
-		// TIM4 Pending Clear (bit 0 UIF Set)
-		Macro_Set_Bit(TIM4->SR, UIF_BIT);
-
-		// NVIC Pending Clear
-		NVIC_ClearPendingIRQ(TIM4_IRQn);
-
-		// TIM4 Interrupt Enable (bit 0 UIE Set)
-		Macro_Set_Bit(TIM4->DIER, UIE_BIT);
-
-		// NVIC Interrupt Enable
-		NVIC_EnableIRQ(TIM4_IRQn);
-
-		// TIM4 Start (bit 0 CEN bit Set)
-		Macro_Set_Bit(TIM4->CR1, CEN_BIT);
-	}
-
-	else
-	{
-		NVIC_DisableIRQ(30);
-		Macro_Clear_Bit(TIM4->CR1, 0);
-		Macro_Clear_Bit(TIM4->DIER, 0);
-	}
-}
-
-void TIM2_Stopwatch_Start(void)
-{
-	// APB1 주변장치 clock on (bit 0 : TIM2 EN)
-	Macro_Set_Bit(RCC->APB1ENR, TIM2_CLK_EN_BIT);
-
-	// TIM2 CR1 설정: down count(ARPE : 0, DIR : 1), one shot (OPM : 1), disable (CEN : 0)
-	TIM2->CR1 = (ARPE_DOWN << ARPE_BIT) | (DIR_DOWN << DIR_BIT) | (OPM_ONE_SHOT << OPM_BIT) | (CEN_DISABLE << CEN_BIT);
-
-	// PSC 초기값 설정 => 20usec tick이 되도록 설계 (50KHz)
-	TIM2->PSC = (int)(DEFAULT_PSC + 0.5)-1;
-
-	// ARR 초기값 설정 => 최대값 0xFFFF 설정
-	TIM2->ARR = 0xFFFF;
-
-	// UG 이벤트 발생
-	Macro_Set_Bit(TIM2->EGR, UG_BIT);
-
-	// TIM2 start (counter enable)
-	Macro_Set_Bit(TIM2->CR1, CEN_BIT);
-}
-
-unsigned int TIM2_Stopwatch_Stop(void)
-{
-	unsigned int time;
-
-	// TIM2 stop (counter disable)
-	Macro_Clear_Bit(TIM2->CR1, CEN_BIT);
-
-	// CNT 초기 설정값 (0xffff)와 현재 CNT의 펄스수 차이 (DEFAULT_ARR - TIM2->CNT) 를 구하고
-	// 그 펄스수 하나가 20usec이므로 20을 곱한값을 time에 저장
-	time = (DEFAULT_ARR - TIM2->CNT) * TIM2_TICK;
-
-	// 계산된 time 값을 리턴(단위는 usec)
-	return time;
-}
-
-#if 0
-void TIM2_Delay(int time)
-{
-	Macro_Set_Bit(RCC->APB1ENR, TIM2_CLK_EN_BIT);
-	// TIM2 CR1 설정: down count(ARPE : 0, DIR : 1), one shot (OPM : 1), disable (CEN : 0)
-	TIM2->CR1 = (ARPE_DOWN << ARPE_BIT) | (DIR_DOWN << DIR_BIT) | (OPM_ONE_SHOT << OPM_BIT) | (CEN_DISABLE << CEN_BIT);
-
-	// PSC 초기값 설정 => 20usec tick이 되도록 설계 (50KHz)
-	TIM2->PSC = (int)(DEFAULT_PSC + 0.5)-1;
-
-	// ARR 초기값 설정 => 요청한 time msec에 해당하는 초기값 설정
-	TIM2->ARR = time * (int)(1000./TIM2_TICK + 0.5);
-
-	// UG 이벤트 발생
-	Macro_Set_Bit(TIM2->EGR, UG_BIT);
-
-	// UIF(Update Interrupt Pending) Clear
-	Macro_Clear_Bit(TIM2->SR, UIF_BIT);
-
-	// TIM2 start
-	Macro_Set_Bit(TIM2->CR1, CEN_BIT);
-
-	// Wait timeout
-	while(!Macro_Check_Bit_Set(TIM2->SR, UIF_BIT));
-
-	// manual clear
-	Macro_Clear_Bit(TIM2->SR, UIF_BIT);
-
-	// TIM2 Stop
-	Macro_Clear_Bit(TIM2->CR1, CEN_BIT);
-}
-#endif
-
-#if 1
-void TIM2_Delay(int time)
-{
-	Macro_Set_Bit(RCC->APB1ENR, 0);
-	TIM2->CR1 = (0x1<<4)|(0x1<<3);
-	TIM2->PSC = (int)(TIMXCLK / TIM2_FREQ + 0.5) - 1;
-
-	unsigned int pls = TIM2_1ms_Pls * time;
-	int n = pls / TIM2_MAX;
-	int m = pls % TIM2_MAX;
-	int i;
-
-	for(i = 0; i < n; i++)
-	{
-		TIM2->ARR = TIM2_MAX;
-		Macro_Set_Bit(TIM2->EGR, 0);
-		Macro_Clear_Bit(TIM2->SR, 0);
-		Macro_Set_Bit(TIM2->CR1, 0);
-		while(!Macro_Check_Bit_Set(TIM2->SR, 0));		
-	}
-
-	TIM2->ARR = m;
-	Macro_Set_Bit(TIM2->EGR, 0);
-	Macro_Clear_Bit(TIM2->SR, 0);
-	Macro_Set_Bit(TIM2->CR1, 0);
-	while(!Macro_Check_Bit_Set(TIM2->SR, 0));
-
-	Macro_Clear_Bit(TIM2->CR1, 0);
-}
-#endif
 
 void TIM2_Start_OnePulse(int time)
 {
@@ -211,8 +76,10 @@ int TIM2_Check_Timeout(void)
 void TIM2_Stop(void)
 {
 	Macro_Clear_Bit(TIM2->CR1, 0);
+	Macro_Clear_Bit(TIM2->DIER, 0);
 }
 
+/* ========== Timer 4 ========== */
 void TIM4_Repeat(int time)
 {
 	Macro_Set_Bit(RCC->APB1ENR, TIM4_CLK_EN_BIT);
@@ -236,6 +103,42 @@ void TIM4_Repeat(int time)
 	Macro_Set_Bit(TIM4->CR1, CEN_BIT);
 }
 
+void TIM4_Repeat_Interrupt_Enable(int en, int time)
+{
+	if(en)
+	{
+		// TIM4 Clock On
+		Macro_Set_Bit(RCC->APB1ENR, 2);
+
+		TIM4->CR1 = (1<<4)|(0<<3);
+		TIM4->PSC = (unsigned int)(TIMXCLK/(double)TIM4_FREQ + 0.5)-1;
+		TIM4->ARR = TIM4_1ms_Pls * time;
+		Macro_Set_Bit(TIM4->EGR,0);
+
+		// TIM4 Pending Clear (bit 0 UIF Set)
+		Macro_Clear_Bit(TIM4->SR, UIF_BIT);
+
+		// NVIC Pending Clear
+		NVIC_ClearPendingIRQ(TIM4_IRQn);
+
+		// TIM4 Interrupt Enable (bit 0 UIE Set)
+		Macro_Set_Bit(TIM4->DIER, UIE_BIT);
+
+		// NVIC Interrupt Enable
+		NVIC_EnableIRQ(TIM4_IRQn);
+
+		// TIM4 Start (bit 0 CEN bit Set)
+		Macro_Set_Bit(TIM4->CR1, CEN_BIT);
+	}
+
+	else
+	{
+		NVIC_DisableIRQ(30);
+		Macro_Clear_Bit(TIM4->CR1, 0);
+		Macro_Clear_Bit(TIM4->DIER, 0);
+	}
+}
+
 int TIM4_Check_Timeout(void)
 {
 	if(Macro_Check_Bit_Set(TIM4->SR, UIF_BIT))
@@ -252,12 +155,15 @@ int TIM4_Check_Timeout(void)
 void TIM4_Stop(void)
 {
 	Macro_Clear_Bit(TIM4->CR1, 0);
+	Macro_Clear_Bit(TIM4->DIER, 0);
 }
 
 void TIM4_Change_Value(int time)
 {
 	TIM4->ARR = 50 * time;
 }
+
+/* ========== Timer 3 ========== */
 void TIM3_Out_Init(void)
 {
 	Macro_Set_Bit(RCC->AHB1ENR, 1);
@@ -274,7 +180,6 @@ void TIM3_Out_Stop(void)
 {
 	Macro_Clear_Bit(TIM3->CR1, 0);
 }
-
 
 void TIM3_Out_PWM_Generation(unsigned short freq, int duty)
 {

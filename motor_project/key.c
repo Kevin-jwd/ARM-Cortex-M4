@@ -21,7 +21,7 @@ void Key_Wait_Key_Released(void)
 	while(!Macro_Check_Bit_Set(GPIOC->IDR, 13));
 }
 
-#if 1
+#if 0
 void Key_ISR_Enable(int en)
 {
 	if(en)
@@ -47,7 +47,7 @@ void Key_ISR_Enable(int en)
 }
 #endif
 
-#if 0
+#if 1
 void Key_ISR_Enable(int en)
 {
 	if(en)

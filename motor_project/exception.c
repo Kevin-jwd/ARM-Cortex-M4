@@ -17,7 +17,7 @@ extern volatile int is_falling_edge_detected;
 
 void EXTI15_10_IRQHandler(void)
 {
-	is_falling_edge_detected = 1;//U - is_falling_edge_detected;
+	is_falling_edge_detected = 1U-is_falling_edge_detected;//U - is_falling_edge_detected;
 
 	// KEY(EXTI) Pending Clears
 	EXTI->PR = (PENDING_CLEAR_BIT << PORTC_SW_PIN);
@@ -44,14 +44,28 @@ void USART2_IRQHandler(void)
 	NVIC_ClearPendingIRQ(USART2_IRQn);
 }
 
-/* Timer2 ISR */
+/* Timer2 ISR (for Stop) */
 void TIM2_IRQHandler(void)
 {
+	is_timer_timeout = 1U;
+
 	// TIM4 Interrupt Pending Clear
 	Macro_Clear_Bit(TIM2->SR, UIF_BIT);
 
 	// NVIC Pending Clear
 	NVIC_ClearPendingIRQ(TIM2_IRQn);
+}
 
-	is_timer_timeout = 1U;
+extern volatile uint8_t is_stop_delay_timeout;
+
+/* Timer4 ISR (for Short Stop) */
+void TIM4_IRQHandler(void)
+{
+	is_stop_delay_timeout = 1U;
+
+	// TIM4 Interrupt Pending Clear
+	Macro_Clear_Bit(TIM4->SR, UIF_BIT);
+
+	// NVIC Pending Clear
+	NVIC_ClearPendingIRQ(TIM4_IRQn);
 }

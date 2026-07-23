@@ -21,6 +21,10 @@
 /* 내부 스위치 PIN */
 #define PORTC_SW_PIN (13U)
 
+/* RCC->APB1FNR: APB1 주변장치 CLK 설정 레지스터 */
+#define TIM2_CLK_EN_BIT (0U)
+#define TIM4_CLK_EN_BIT (2U)
+
 /* Timer 2 1pulse 주기, 주파수 */
 #define TIM2_TICK (20U)
 #define TIM2_FREQ (1000000. / TIM2_TICK)
@@ -38,10 +42,6 @@
 #define TIM4_FREQ (1000000. / TIM4_TICK)
 #define TIM4_1ms_Pls (TIM4_FREQ/1000.)
 #define TIM4_MAX    (0xFFFFU)
-
-/* RCC->APB1FNR: APB1 주변장치 CLK 설정 레지스터 */
-#define TIM2_CLK_EN_BIT (0U)
-#define TIM4_CLK_EN_BIT (2U)
 
 /* TIMx->CR1: Timer 기본 설정 레지스터 */
 // bit position
