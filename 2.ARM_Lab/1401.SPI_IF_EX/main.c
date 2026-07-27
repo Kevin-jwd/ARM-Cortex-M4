@@ -20,6 +20,7 @@ void Main(void)
 	/* PCLK2(96MHz)의 분주비 전달 : 2,4,6,8,16,32,64,128,256 */
 	/* SC16IS752의 SPI 최대 속도 4MHz => 32(3MHz) */
 
+	// SPI1_SC16IS752_Init(32); 			
 	SPI1_SC16IS752_Init(32); 			
 	SPI1_SC16IS752_Config_GPIO(0xFF);
 

@@ -17,9 +17,11 @@ void EXTI15_10_IRQHandler(void)
 	// KEY Pressed 메시지 인쇄
 	printf("KEY Pressed !!!!!\n");
 
-	// KEY(EXTI) Pending Clears
+	// ISR 서비스 후 EXTI -> NVIC 순서대로 pending clear
+
+	// 1) KEY(EXTI) Pending Clear (무조건 대입 연산)
 	EXTI->PR = (PENDING_CLEAR_BIT << PIN_NUM);
 
-	// NVIC Pending Clear
+	// 2) NVIC Pending Clear
 	NVIC_ClearPendingIRQ(EXTI15_10_IRQn);
 }

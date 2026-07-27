@@ -10,45 +10,45 @@ void _Invalid_ISR(void)
 	for(;;);
 }
 
-/* Falling edge / Rising edge */
-extern volatile uint8_t is_timer_started;
-extern volatile uint8_t is_timer_timeout;
-extern volatile int is_falling_edge_detected;
+/* Falling edge / Rising edge ISR */
+extern volatile uint8_t is_falling_edge_detected;
 
 void EXTI15_10_IRQHandler(void)
 {
 	is_falling_edge_detected = 1U-is_falling_edge_detected;//U - is_falling_edge_detected;
-
+	
 	// KEY(EXTI) Pending Clears
 	EXTI->PR = (PENDING_CLEAR_BIT << PORTC_SW_PIN);
-
+	
 	// NVIC Pending Clear
 	NVIC_ClearPendingIRQ(EXTI15_10_IRQn);
 }
 
-/* USART2 ISR */
+/* USART2 ISR (for setting motor speed) */
 extern volatile uint8_t Uart_Data_In;
 extern volatile unsigned char Uart_Data;
 
 void USART2_IRQHandler(void)
 {
-	// 수신된 데이터는 Uart_Data에 저장
-	Uart_Data = USART2->DR;
-
 	// Uart_Data_In Flag Setting
 	Uart_Data_In = 1U;
 
+	// 수신된 데이터는 Uart_Data에 저장
+	Uart_Data = USART2->DR;
+	
 	// SubSource Auto Pending Clear
-
+	
 	// NVIC Pending Clear
 	NVIC_ClearPendingIRQ(USART2_IRQn);
 }
 
 /* Timer2 ISR (for Stop) */
+extern volatile uint8_t is_timer2_timeout;
+
 void TIM2_IRQHandler(void)
 {
-	is_timer_timeout = 1U;
-
+	is_timer2_timeout = 1U;
+	
 	// TIM4 Interrupt Pending Clear
 	Macro_Clear_Bit(TIM2->SR, UIF_BIT);
 
@@ -56,12 +56,12 @@ void TIM2_IRQHandler(void)
 	NVIC_ClearPendingIRQ(TIM2_IRQn);
 }
 
-extern volatile uint8_t is_stop_delay_timeout;
-
 /* Timer4 ISR (for Short Stop) */
+extern volatile uint8_t is_timer4_timeout;
+
 void TIM4_IRQHandler(void)
 {
-	is_stop_delay_timeout = 1U;
+	is_timer4_timeout = 1U;
 
 	// TIM4 Interrupt Pending Clear
 	Macro_Clear_Bit(TIM4->SR, UIF_BIT);

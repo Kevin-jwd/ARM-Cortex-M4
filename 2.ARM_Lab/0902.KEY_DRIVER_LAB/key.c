@@ -4,12 +4,18 @@
 
 void Key_Poll_Init(void)
 {
+	// AHB1ENR
+	// AHB1 버스에 연결된 주변장치들의 CLK Enable
 	Macro_Set_Bit(RCC->AHB1ENR, 2); 
+
+	// PORTC 13번 Input mode
 	Macro_Write_Block(GPIOC->MODER, 0x3, 0x0, 26);
 }
 
 int Key_Get_Pressed(void)
 {
+	// IDR: Input Data Register
+	// 입력 속성으로 설정된 핀의 입력 값을 확인
 	// Key가 눌렸으면 0, 안 눌렸으면 1 리턴
 	return (Macro_Check_Bit_Clear(GPIOC->IDR, GPIOC_PIN));
 }

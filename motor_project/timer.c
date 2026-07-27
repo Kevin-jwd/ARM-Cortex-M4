@@ -173,8 +173,8 @@ void TIM3_Out_Init(void)
 	Macro_Write_Block(GPIOB->AFR[0], 0xf, 0x2, 0); 	// PB0 => AF02
 	
 	Macro_Write_Block(TIM3->CCMR2,0xff, 0x60, 0);
-	TIM3->CCER = (0<<9)|(1<<8);
-	}
+	TIM3->CCER = (0<<9)|(1<<8);	
+}
 
 void TIM3_Out_Stop(void)
 {
@@ -201,18 +201,10 @@ void TIM3_Out_PWM_Generation(unsigned short freq, int duty)
 
 void TIM3_Out_Freq_Generation(unsigned short freq, uint8_t speed_level)
 {
-	if(speed_level < 1U)
-	{
-		speed_level = 1U;
-	}
-	else if(speed_level > 9U)
-	{
-		speed_level = 9U;
-	}
-
 	int duty_percent = 50U + ((speed_level - 1U) * 5U);
 
 	TIM3->CR1 = (0x1 << 4) | (0x0 << 3);
+
 	// Timer 주파수가 TIM3_FREQ가 되도록 PSC 설정
 	// 96MHz / 8MHz
 	TIM3->PSC = TIMXCLK / TIM3_FREQ - 1;
@@ -236,3 +228,69 @@ int Calculate_PWM_CCR(uint8_t speed_level)
 	int duty_percent = 50U + ((speed_level - 1U) * 5U);
 	return ((TIM3_PWM_ARR + 1U) * duty_percent / 100U);
 }
+
+void TIM5_Out_Freq_Generation(unsigned short freq, uint8_t speed_level)
+{
+	int duty_percent = 50U + ((speed_level - 1U) * 5U);
+
+	TIM5->CR1 = (0x1 << 4) | (0x0 << 3);
+
+	// Timer 주파수가 TIM3_FREQ가 되도록 PSC 설정
+	// 96MHz / 8MHz
+	TIM5->PSC = TIMXCLK / TIM5_FREQ - 1;
+
+	// 요청한 주파수가 되도록 ARR 설정
+	// 8MHz / target_freq
+	TIM5->ARR = (int)((double)TIM5_FREQ / freq + 0.5) -1 ;
+
+	// Duty Rate 50%가 되도록 CCR3 설정
+	TIM5->CCR3 = ((TIM5->ARR + 1U) * duty_percent / 100U);
+
+	// Manual Update(UG 발생)
+	Macro_Set_Bit(TIM5->EGR, UG_BIT);
+
+	// Down Counter, Repeat Mode, Timer Start
+	TIM5->CR1 = (DIR_DOWN << DIR_BIT) | (OPM_REPEAT << OPM_BIT) | (CEN_ENABLE << CEN_BIT);
+}
+
+void TIM5_Out_Init(void)
+{
+	Macro_Set_Bit(RCC->AHB1ENR, 1);
+	Macro_Set_Bit(RCC->APB1ENR, 3);
+	
+	Macro_Write_Block(GPIOA->MODER, 0x3, 0x2, 0);  	// PA0 => ALT
+	Macro_Write_Block(GPIOA->AFR[0], 0xf, 0x2, 0); 	// PA0 => AF02
+	
+	Macro_Write_Block(TIM3->CCMR2,0xff, 0x60, 0);
+
+	TIM3->CCER = (0<<1)|(1<<0);	
+}
+
+void TIM5_Out_PWM_Generation(unsigned short freq, int speed, uint8_t dir)
+{
+	int duty_percent = 50U + ((speed - 1U) * 5U);
+
+	// CW
+	if(dir)
+	{
+		TIM5->CR1 = (0x0 << 1) | (0x1 << 0);
+		TIM5->CCR1 = (int)(TIM5->ARR * ((double)duty_percent / 100.) + 0.5);
+	}
+	// CCW
+	else
+	{
+		TIM5->CR1 = (0x0 << 5) | (0x1 << 4);
+		TIM5->CCR2 = (int)(TIM5->ARR * ((double)duty_percent / 100.) + 0.5);
+	}
+
+	TIM5->PSC = TIMXCLK / TIM5_FREQ - 1;
+
+	TIM5->ARR = (int)((double)TIM5_FREQ / freq + 0.5) -1 ;
+
+	// Manual Update(UG 발생)
+	Macro_Set_Bit(TIM5->EGR, UG_BIT);
+
+	// Down Counter, Repeat Mode, Timer Start
+	TIM5->CR1 = (DIR_DOWN << DIR_BIT) | (OPM_REPEAT << OPM_BIT) | (CEN_ENABLE << CEN_BIT);
+}
+

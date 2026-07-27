@@ -43,6 +43,10 @@
 #define TIM4_1ms_Pls (TIM4_FREQ/1000.)
 #define TIM4_MAX    (0xFFFFU)
 
+#define TIM5_TICK (20U)
+#define TIM5_FREQ (1000000. / TIM5_TICK)
+
+
 /* TIMx->CR1: Timer 기본 설정 레지스터 */
 // bit position
 #define ARPE_BIT     (7U)

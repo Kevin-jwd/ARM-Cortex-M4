@@ -40,18 +40,26 @@ unsigned int TIM2_Stopwatch_Stop(void)
 void TIM2_Delay(int time)
 {
 	Macro_Set_Bit(RCC->APB1ENR, TIM2_CLK_EN_BIT);
+
 	// TIM2 CR1 설정: down count(ARPE : 0, DIR : 1), one shot (OPM : 1), disable (CEN : 0)
 	TIM2->CR1 = (ARPE_DOWN << ARPE_BIT) | (DIR_DOWN << DIR_BIT) | (OPM_ONE_SHOT << OPM_BIT) | (CEN_DISABLE << CEN_BIT);
 
 	// PSC 초기값 설정 => 20usec tick이 되도록 설계 (50KHz)
-	TIM2->PSC = (int)(DEFAULT_PSC + 0.5)-1;
+	// (PSC + 1)분주 (ex. PSC = 0 -> 1분주)
+	TIM2->PSC = (int)((DEFAULT_PSC + 0.5)-1);
 
 	// ARR 초기값 설정 => 요청한 time msec에 해당하는 초기값 설정
 	TIM2->ARR = time * (int)(1000./TIM2_TICK + 0.5);
 
+	// EGR: Update Event 발생 레지스터
+	// Auto Update: Repeat 모드에서 Timer가 timeout된 경우
+	// Manual Update: SW적으로 UEV 발생시키는 경우
 	// UG 이벤트 발생
 	Macro_Set_Bit(TIM2->EGR, UG_BIT);
 
+	// SR 
+	// Timer가 timeout이 발생하면 1로, set
+	// 자동 clear되지 않으므로 반드시 확인 후 수동으로 0을 써서 clear
 	// UIF(Update Interrupt Pending) Clear
 	Macro_Clear_Bit(TIM2->SR, UIF_BIT);
 

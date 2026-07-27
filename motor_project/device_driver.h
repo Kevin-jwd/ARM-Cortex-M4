@@ -7,6 +7,8 @@
 
 extern void Uart2_Init(int baud);
 extern void Uart2_Send_Byte(char data);
+extern char Uart2_Get_Pressed(void);
+extern void Uart2_RX_Interrupt_Enable(int en);
 
 extern void Uart1_Init(int baud);
 extern void Uart1_Send_Byte(char data);
@@ -14,8 +16,7 @@ extern void Uart1_Send_String(char *pt);
 extern void Uart1_Printf(char *fmt,...);
 extern char Uart1_Get_Char(void);
 extern char Uart1_Get_Pressed(void);                               
-extern char Uart2_Get_Pressed(void);
-                        
+
 // SysTick.c
 
 extern void SysTick_Run(unsigned int msec);
@@ -59,3 +60,6 @@ extern int TIM4_Check_Timeout(void);
 extern void TIM4_Stop(void);
 extern void TIM4_Change_Value(int time);
 extern void TIM4_Repeat_Interrupt_Enable(int en, int time);
+
+void TIM5_Out_PWM_Generation(unsigned short freq, int speed, uint8_t dir);
+extern void TIM5_Out_Init(void);

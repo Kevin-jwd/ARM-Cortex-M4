@@ -40,6 +40,12 @@ void SPI1_SC16IS752_Write_Reg(unsigned int addr, unsigned int data)
 	SPI1_CS_HIGH();
 	SPI1_CS_LOW();
 
+	// volatile int i;
+	// for(i=0;i<4000000;i++)
+	// {
+	// 	;
+	// }
+
 	SPI1->DR = (0 << 15) | ((addr & 0xf) << 11) | (data & 0xff);
 	while(Macro_Check_Bit_Clear(SPI1->SR, 1));
 	while(Macro_Check_Bit_Set(SPI1->SR, 7));
