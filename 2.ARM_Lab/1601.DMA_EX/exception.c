@@ -29,9 +29,21 @@ void DMA2_Stream0_IRQHandler(void)
 
 volatile int DMA1_STREAM6_DONE = 0;
 
+#if 0
 void DMA1_Stream6_IRQHandler(void)
 {
-	DMA2->HIFCR = 0x3F << 0;
+	DMA1->HIFCR = 0x3F << 16;
+	NVIC_ClearPendingIRQ(DMA1_Stream6_IRQn);
+    DMA1_STREAM6_DONE = 1;
+}
+#endif
+
+#if 1
+void DMA1_Stream6_IRQHandler(void)
+{
+	printf("ISR 15 !!\n");
+	DMA1->HIFCR = 0x3F << 0;
 	NVIC_ClearPendingIRQ(15);
     DMA1_STREAM6_DONE = 1;
 }
+#endif

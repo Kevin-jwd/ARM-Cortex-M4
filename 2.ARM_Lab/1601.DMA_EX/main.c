@@ -11,7 +11,7 @@ static void Sys_Init(int baud)
 	LED_Init();
 }
 
-#if 1
+#if 0
 
 extern volatile int TIM4_Expired;
 
@@ -76,7 +76,7 @@ void Main(void)
     Sys_Init(115200);
     printf("DMA Software Trigger Test(STM32F411)\n");
 
-    TIM4_Repeat_Interrupt_Enable(1, 1000);
+    TIM4_Repeat_Interrupt_Enable(1, 250);
 
     for(i = 0; i < NUM_OF_DATA; i++)
     {
@@ -125,7 +125,35 @@ const char * str[] = {
 	"[6] The DMA controller serves the request depending on the channel priorities.\n"
 	"[7] As soon as the DMA Controller accesses the peripheral, an Acknowledge is sent to the peripheral by the DMA Controller.\n"
 	"[8] The peripheral releases its request as soon as it gets the Acknowledge from the DMA Controller.\n"
-	"[9] Once the request is deasserted by the peripheral, the DMA Controller release the Acknowledge.\n" };
+	"[9] Once the request is deasserted by the peripheral, the DMA Controller release the Acknowledge.\n"
+"[1] The DMA controller performs direct memory transfer by sharing the system bus with the Cortex™-M3 core.\n"
+	"[2] The DMA request may stop the CPU access to the system bus for some bus cycles,\n"
+	"[3] when the CPU and DMA are targeting the same destination (memory or peripheral).\n"
+	"[4] The bus matrix implements round-robin scheduling, thus ensuring at least half of the system bus bandwidth (both to memory and peripheral) for the CPU.\n"
+	"[5] After an event, the peripheral sends a request signal to the DMA Controller.\n"
+	"[6] The DMA controller serves the request depending on the channel priorities.\n"
+	"[7] As soon as the DMA Controller accesses the peripheral, an Acknowledge is sent to the peripheral by the DMA Controller.\n"
+	"[8] The peripheral releases its request as soon as it gets the Acknowledge from the DMA Controller.\n"
+	"[9] Once the request is deasserted by the peripheral, the DMA Controller release the Acknowledge.\n"
+    "[1] The DMA controller performs direct memory transfer by sharing the system bus with the Cortex™-M3 core.\n"
+	"[2] The DMA request may stop the CPU access to the system bus for some bus cycles,\n"
+	"[3] when the CPU and DMA are targeting the same destination (memory or peripheral).\n"
+	"[4] The bus matrix implements round-robin scheduling, thus ensuring at least half of the system bus bandwidth (both to memory and peripheral) for the CPU.\n"
+	"[5] After an event, the peripheral sends a request signal to the DMA Controller.\n"
+	"[6] The DMA controller serves the request depending on the channel priorities.\n"
+	"[7] As soon as the DMA Controller accesses the peripheral, an Acknowledge is sent to the peripheral by the DMA Controller.\n"
+	"[8] The peripheral releases its request as soon as it gets the Acknowledge from the DMA Controller.\n"
+	"[9] Once the request is deasserted by the peripheral, the DMA Controller release the Acknowledge.\n"
+"[1] The DMA controller performs direct memory transfer by sharing the system bus with the Cortex™-M3 core.\n"
+	"[2] The DMA request may stop the CPU access to the system bus for some bus cycles,\n"
+	"[3] when the CPU and DMA are targeting the same destination (memory or peripheral).\n"
+	"[4] The bus matrix implements round-robin scheduling, thus ensuring at least half of the system bus bandwidth (both to memory and peripheral) for the CPU.\n"
+	"[5] After an event, the peripheral sends a request signal to the DMA Controller.\n"
+	"[6] The DMA controller serves the request depending on the channel priorities.\n"
+	"[7] As soon as the DMA Controller accesses the peripheral, an Acknowledge is sent to the peripheral by the DMA Controller.\n"
+	"[8] The peripheral releases its request as soon as it gets the Acknowledge from the DMA Controller.\n"
+	"[9] Once the request is deasserted by the peripheral, the DMA Controller release the Acknowledge.\n"
+ };
 
 void Main(void)
 {
@@ -133,7 +161,7 @@ void Main(void)
 
     Sys_Init(115200);
     printf("USART String TX Test\n\n");
-    TIM4_Repeat_Interrupt_Enable(1, 1000);
+    TIM4_Repeat_Interrupt_Enable(1, 100);
 
     for (;;)
     {
@@ -154,7 +182,7 @@ void Main(void)
 
 #endif
 
-#if 0
+#if 1
 
 extern volatile int TIM4_Expired;
 extern volatile int DMA1_STREAM6_DONE;
@@ -190,9 +218,15 @@ void Main(void)
         {
             if (str_num < (sizeof(str) / sizeof(str[0])))
             {
+                // uart 장치 HW trigger 설정
+                // 7 DMAT: DMA enable transmitter
+                // This bit is set/reset by software
+                // 1: DMA mode is enabled for transmission.
+                // 0: DMA mode is disabled for transmission
                 Macro_Set_Bit(USART2->CR3, 7);
-                DMA1_Stream6_USART2_TX_Satrt((void * )str[str_num], strlen(str[str_num]));
+                DMA1_Stream6_USART2_TX_Start((void * )str[str_num], strlen(str[str_num]));
                 str_num++;
+                printf("\n\n\n%d\n\n\n", str_num);
                 DMA1_STREAM6_DONE = 0;                
             }
 

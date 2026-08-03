@@ -9,8 +9,8 @@ int main()
 {
 	for (int i = 0; i < 10; i++)
 	{
-		std::cout << "i * i = " << i * i << " 입니다\n";
-		std::cout << "i * i = " << i * i << " 입니다" << std::endl;
+		// std::cout << i << " * " << i << " = " << i * i << " 입니다" << std::endl;
+		std::cout << i << " * " << i << " = " << i * i << " 입니다\n";
 	}
 
 	return 0;
@@ -54,6 +54,7 @@ int main()
 	x = 5, y = 10;
 	your::x = 100, your::y = 200;
 	std::cout << your::func(x, y) << std::endl;
+	std::cout << my::func(your::x, your::y) << std::endl;
 
 	return 0;
 }
@@ -170,13 +171,19 @@ using namespace std;
 int main()
 {
 	int a = 100;
+	int b = 120;
+	int c = 140;
 
 	cout << hex << a << " " << dec << a << " " << oct << a << endl;
 	cout << showbase << uppercase << hex << a << " " << dec << a << " " << oct << a << endl;
+	cout << noshowbase << nouppercase << hex << a << " " << dec << a << " " << oct << a << endl;
 	cout << a << endl;
 	cout << setw(8) << dec << a << endl;
 	cout << setw(8) << -100 << " " << setfill('*') << left << setw(8) << dec << a << endl;
 	cout << a << endl;
+	cout << setfill('/') << left << setw(10) << a << endl;
+	cout << setfill('/') << right << setw(10) << a << endl;
+	cout << hex << a << ' ' << b << ' ' << c << endl;
 
 	return 0;
 }
@@ -238,7 +245,7 @@ int main()
 {
 	double d;
 	char s[20];
-	 
+
 	cout << "실수 값 입력 ";
 	cin >> d;
 	cout << d << endl;
@@ -298,6 +305,37 @@ int main()
 	cout << "두 단어 입력(Hello World)" << endl;
 	cin.getline(s, 20);
 	cout << s << endl;
+
+	return 0;
+}
+#endif
+
+/***********************************************************/
+// [1-8-4] string
+/***********************************************************/
+
+#if 0
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+	double d;
+	char s[20];
+
+	string str;
+
+	cout << "실수 값 입력 ";
+	cin >> d;
+	cout << d << endl;
+	
+	cin.ignore();
+
+	cout << "두 단어 입력(Hello World)" << endl;
+	getline(cin, str);
+
+	cout << str << endl;
 
 	return 0;
 }
@@ -440,6 +478,12 @@ int f3(myT x, int y)
 	return x + y;
 }
 
+template<typename myyT, typename myyyT>
+myyT f4(myyT x, myyyT y)
+{
+	return x * y;
+}
+
 int main()
 {
 	cout << f1(10, 20) << endl;
@@ -450,6 +494,9 @@ int main()
 
 	cout << f3<int>(10, 20) << endl;
 	cout << f3<double>(3.14, 30) << endl;
+
+	cout << f4<double, int>(31.4, 3) << endl;
+	cout << f4<int, double>(3, 31.4) << endl;
 
 	return 0;
 }
@@ -588,8 +635,7 @@ int main()
 /***********************************************************/
 // [1-17] ranged for
 /***********************************************************/
-
-#if 0
+#if 1
 #include <iostream>
 using namespace std;
 
@@ -597,7 +643,7 @@ int main()
 {
 	int a[4] = { 1,2,3,4 };
 
-	for (int i = 0; i < sizeof(a) / sizeof(a[0]); i++)
+	for (int i = 0; i < (int)(sizeof(a) / sizeof(a[0])); i++)
 	{
 		cout << a[i] << endl;
 	}
@@ -606,6 +652,32 @@ int main()
 	{
 		cout << x << endl;
 	}
+
+	return 0;
+}
+#endif
+
+#if 0
+#include <iostream>
+using namespace std;
+
+// 함수 설계
+template<typename T>
+void func(T *arr)
+{
+	for(T x : arr)
+	{
+		cout << x << endl;
+	}
+}
+
+int main()
+{
+	int a[3] = { 10,20,30 };
+	const char * b[2] = { "Kim", "Lee" };
+
+	func(a);
+	func(b);
 
 	return 0;
 }
