@@ -635,7 +635,7 @@ int main()
 /***********************************************************/
 // [1-17] ranged for
 /***********************************************************/
-#if 1
+#if 0
 #include <iostream>
 using namespace std;
 
@@ -928,7 +928,7 @@ void mart_calc::buy(int price)
 
 void mart_calc::change_tax(double tax)
 {
-	// class의 private 변수 tax를 전달 받은 값으로 변경
+	this->tax = tax;
 
 }
 
@@ -1117,6 +1117,10 @@ public:
 };
 
 // member function buy 설계
+void mart_calc::buy(int price, double tax)
+{
+	total += price * (1 + tax);
+}
 
 int main(void)
 {
@@ -1587,11 +1591,7 @@ public:
 	const int age;
 	const char * name;
 
-	student(int a, const char * n)
-	{
-		age = a;
-		name = n;
-	}
+	student(int a, const char * n) : age(a), name(n) { };
 };
 
 int main(void)
@@ -1717,7 +1717,7 @@ int main(void)
 // [2-23] Class에서 Type Template 사용
 /***********************************************************/
 
-#if 0
+#if 1
 #include <iostream>
 using namespace std;
 
