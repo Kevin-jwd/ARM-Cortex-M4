@@ -1717,7 +1717,7 @@ int main(void)
 // [2-23] Class에서 Type Template 사용
 /***********************************************************/
 
-#if 1
+#if 0
 #include <iostream>
 using namespace std;
 
@@ -1953,9 +1953,9 @@ class B : public A
 public:
 	void f()
 	{
-		cout << a << endl;
-		cout << b << endl;
-		cout << c << endl;
+		cout << a << endl;   // public
+		cout << b << endl;   // protected
+		cout << c << endl;   // Class A에서 private이므로 액세스 불가
 	}
 };
 
@@ -1964,9 +1964,9 @@ class C : protected A
 public:
 	void f()
 	{
-		cout << a << endl;
-		cout << b << endl;
-		cout << c << endl;
+		cout << a << endl;   // protected
+		cout << b << endl;   // protected
+		cout << c << endl;   // Class A에서 private이므로 액세스 불가
 	}
 };
 
@@ -1975,30 +1975,30 @@ class D : private A
 public:
 	void f()
 	{
-		cout << a << endl;
-		cout << b << endl;
-		cout << c << endl;
+		cout << a << endl;   // private
+		cout << b << endl;   // private
+		cout << c << endl;   // Class A에서 private이므로 액세스 불가
 	}
 };
 
 int main()
 {
 	B x;
-	cout << x.a << endl;
-	cout << x.b << endl;
-	cout << x.c << endl;
+	cout << x.a << endl;    // public
+	cout << x.b << endl;	// protected
+	cout << x.c << endl;    // private
 	x.f();
 
 	C y;
-	cout << y.a << endl;
-	cout << y.b << endl;
-	cout << y.c << endl;
+	cout << y.a << endl;    // protected
+	cout << y.b << endl;    // protected
+	cout << y.c << endl;    // privated
 	y.f();
 
 	D z;
-	cout << z.a << endl;
-	cout << z.b << endl;
-	cout << z.c << endl;
+	cout << z.a << endl;    // private
+	cout << z.b << endl;    // private
+	cout << z.c << endl;    // private
 	z.f();
 
 	return 0;
@@ -2433,7 +2433,7 @@ public:
 	}
 };
 
-class C : public A, public B
+class C : public B, public A
 {
 public:
 	C() // C() : A(), B() => 이렇게 설계해도 무방(기본적으로 해 줌)
@@ -3316,7 +3316,7 @@ int main()
 // [4-12] friend 외부 함수에 의한 Operator Overloading
 /***********************************************************/
 
-#if 0
+#if 1
 #include <iostream>
 using namespace std;
 
